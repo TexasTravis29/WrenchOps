@@ -16,22 +16,24 @@ export async function POST(request: Request) {
     let actionType = "general";
     const loggedAt = new Date().toISOString();
 
-    if (body.event === "work_approved") {
+    const eventText = String(body.event || "").toLowerCase();
+
+    if (eventText.includes("work approved")) {
       title = "Verify parts";
       actionType = "verify_parts";
     }
 
-    if (body.event === "inspection_completed") {
+    if (eventText.includes("inspection") && eventText.includes("complete")) {
       title = "Advisor review and present";
       actionType = "advisor_review_present";
     }
 
-    if (body.event === "customer_viewed_inspection") {
+    if (eventText.includes("customer viewed inspection")) {
       title = "Advisor follow up with customer";
       actionType = "advisor_follow_up";
     }
 
-    if (body.event === "repair_order_completed") {
+    if (eventText.includes("repair order") && eventText.includes("completed")) {
       title = "Confirm customer pick up time";
       actionType = "confirm_pickup_time";
     }
@@ -39,8 +41,8 @@ export async function POST(request: Request) {
     const { error } = await supabase.from("action_items").insert([
       {
         title,
-        customer: body.customer || "Unknown",
-        ro: body.ro || "N/A",
+        customer: body.customerName || body.customerId?.toString() || "Unknown",
+        ro: body.repairOrderNumber?.toString() || body.ro?.toString() || "N/A",
         status: "unassigned",
         action_type: actionType,
         event_received_at: loggedAt,
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error("Insert error:", error);
+      return Response.json({ ok: false, error: error.message }, { status: 500 });
     }
 
     return Response.json({ ok: true });
