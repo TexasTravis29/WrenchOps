@@ -12,46 +12,23 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const data = body.data || {}; // 👈 CRITICAL FIX
+    const data = body.data || {};
 
-    let title = "New Action";
-    let actionType = "general";
-    const loggedAt = new Date().toISOString();
-
-    const eventText = String(body.event || "").toLowerCase();
-
-    // 🔧 INSPECTION COMPLETED
-    if (data.inspectionId && data.completedDate) {
-      title = "Inspection completed";
-      actionType = "advisor_review_present";
-    }
-
-    // 🔧 REPAIR ORDER COMPLETED
-    if (eventText.includes("repair order") && eventText.includes("completed")) {
-      title = "Confirm customer pick up time";
-      actionType = "confirm_pickup_time";
-    }
-
-    // 🔧 WORK APPROVED
-    if (eventText.includes("work approved")) {
-      title = "Verify parts";
-      actionType = "verify_parts";
-    }
-
-    // 🔧 RO number (from correct location)
-    const roNumber =
-      data.repairOrderNumber?.toString() ||
-      data.repairOrderId?.toString() ||
-      "N/A";
+    // ✅ Clean extraction
+    const roNumber = data.repairOrderNumber?.toString() || "N/A";
+    const customLabel =
+      data.repairOrderCustomLabel?.name || "No Label";
+    const eventText = body.event || "No Event";
+    const updatedAt = data.updatedDate || new Date().toISOString();
 
     const { error } = await supabase.from("action_items").insert([
       {
-        title,
         ro: roNumber,
-        customer: "N/A",
-        status: "unassigned",
-        action_type: actionType,
-        event_received_at: loggedAt,
+        event_text: eventText,
+        custom_label: customLabel,
+        updated_at: updatedAt,
+        action_type: "label_update",
+        event_received_at: new Date().toISOString(),
         raw_payload: body,
       },
     ]);
