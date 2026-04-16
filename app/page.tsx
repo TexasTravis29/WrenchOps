@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
@@ -11,11 +12,17 @@ type ActionItem = {
   updated_at: string | null;
   created_at: string | null;
   is_completed: boolean | null;
+  is_active: boolean | null;
+  started_at: string | null;
+  ended_at: string | null;
+  duration_minutes: number | null;
+  completed_at: string | null;
 };
 
 export default function Home() {
   const [actions, setActions] = useState<ActionItem[]>([]);
   const [filter, setFilter] = useState<"pending" | "completed">("pending");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchActions();
@@ -35,11 +42,27 @@ export default function Home() {
     setActions(data || []);
   };
 
-  const markDone = async (id: string) => {
+  const markDone = async (item: ActionItem) => {
+    const now = new Date();
+    let durationMinutes = item.duration_minutes;
+
+    if (item.started_at && !item.ended_at) {
+      const started = new Date(item.started_at);
+      durationMinutes = Math.round(
+        (now.getTime() - started.getTime()) / 1000 / 60
+      );
+    }
+
     const { error } = await supabase
       .from("action_items")
-      .update({ is_completed: true })
-      .eq("id", id);
+      .update({
+        is_completed: true,
+        is_active: false,
+        ended_at: item.ended_at || now.toISOString(),
+        duration_minutes: durationMinutes,
+        completed_at: now.toISOString(),
+      })
+      .eq("id", item.id);
 
     if (error) {
       console.error("Error marking action complete:", error);
@@ -52,7 +75,10 @@ export default function Home() {
   const markPending = async (id: string) => {
     const { error } = await supabase
       .from("action_items")
-      .update({ is_completed: false })
+      .update({
+        is_completed: false,
+        completed_at: null,
+      })
       .eq("id", id);
 
     if (error) {
@@ -63,6 +89,47 @@ export default function Home() {
     fetchActions();
   };
 
+  const clearAll = async () => {
+    const pendingItems = actions.filter((a) => !a.is_completed);
+
+    if (pendingItems.length === 0) return;
+
+    setLoading(true);
+
+    try {
+      for (const item of pendingItems) {
+        const now = new Date();
+        let durationMinutes = item.duration_minutes;
+
+        if (item.started_at && !item.ended_at) {
+          const started = new Date(item.started_at);
+          durationMinutes = Math.round(
+            (now.getTime() - started.getTime()) / 1000 / 60
+          );
+        }
+
+        const { error } = await supabase
+          .from("action_items")
+          .update({
+            is_completed: true,
+            is_active: false,
+            ended_at: item.ended_at || now.toISOString(),
+            duration_minutes: durationMinutes,
+            completed_at: now.toISOString(),
+          })
+          .eq("id", item.id);
+
+        if (error) {
+          console.error("Error clearing item:", error);
+        }
+      }
+
+      fetchActions();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredActions = actions.filter((action) =>
     filter === "pending"
       ? !action.is_completed
@@ -71,9 +138,28 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      <h1 className="mb-6 text-4xl font-bold text-gray-800">
-        Tekmetric Action Dashboard
-      </h1>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-4xl font-bold text-gray-800">
+          Tekmetric Action Dashboard
+        </h1>
+
+        <div className="flex gap-3">
+          <Link
+            href="/report"
+            className="rounded bg-slate-700 px-4 py-2 text-white hover:bg-slate-800"
+          >
+            Reports
+          </Link>
+
+          <button
+            onClick={clearAll}
+            disabled={loading}
+            className="rounded bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+          >
+            {loading ? "Clearing..." : "Clear All"}
+          </button>
+        </div>
+      </div>
 
       <div className="mb-6 flex gap-3">
         <button
@@ -120,11 +206,23 @@ export default function Home() {
                   ? new Date(action.updated_at).toLocaleString()
                   : "No Updated Date"}
               </div>
+
+              {action.duration_minutes !== null && (
+                <div className="mt-1 text-xs text-emerald-600">
+                  Minutes in label: {action.duration_minutes}
+                </div>
+              )}
+
+              {action.completed_at && (
+                <div className="mt-1 text-xs text-gray-500">
+                  Completed: {new Date(action.completed_at).toLocaleString()}
+                </div>
+              )}
             </div>
 
             {!action.is_completed ? (
               <button
-                onClick={() => markDone(action.id)}
+                onClick={() => markDone(action)}
                 className="rounded bg-green-500 px-4 py-2 text-white hover:bg-green-600"
               >
                 Done
