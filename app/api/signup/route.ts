@@ -80,11 +80,11 @@ export async function POST(req: Request) {
       });
 
     if (createUserError || !createdUserData.user) {
-      return Response.json(
-        { error: createUserError?.message || "Failed to create user." },
-        { status: 400 }
-      );
-    }
+  return Response.json(
+    { error: createUserError?.message || "Failed to create user.", details: JSON.stringify(createUserError) },
+    { status: 400 }
+  );
+}
 
     const user = createdUserData.user;
 
