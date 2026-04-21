@@ -151,6 +151,18 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Screenshot helper */}
+          <div className="mt-4">
+            <p className="mb-2 text-xs font-medium text-gray-500 uppercase tracking-wide">
+              Where to paste it in Tekmetric:
+            </p>
+            <img
+              src="/tekmetric-webhook-screenshot.png"
+              alt="Tekmetric webhook settings location"
+              className="rounded border border-gray-200 w-full shadow-sm"
+            />
+          </div>
+
         {/* Account Settings Card */}
         <div className="rounded-lg bg-white p-6 shadow">
           <h2 className="mb-4 text-lg font-semibold text-gray-800">
