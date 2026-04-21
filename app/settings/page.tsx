@@ -42,6 +42,11 @@ export default function SettingsPage() {
 
       if (res.status === 401) { router.push("/login"); return; }
 
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `Server error: ${res.status}`);
+      }
+
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
@@ -193,6 +198,7 @@ export default function SettingsPage() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Leave blank to keep current password"
+                autoComplete="new password"
                 className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
