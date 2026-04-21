@@ -134,9 +134,9 @@ export default function SettingsPage() {
             Tekmetric Webhook URL
           </h2>
           <p className="mb-4 text-sm text-gray-500">
-            Paste this URL into your Tekmetric webhook settings. This URL is the
-            same for all users — Tekmetric includes your Shop ID in the payload
-            automatically.
+            Paste this URL into your Tekmetric webhook settings.
+            Tekmetric - Settings - Integrations - Webhooks
+
           </p>
           <div className="flex items-center gap-2">
             <code className="flex-1 overflow-x-auto rounded border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                 className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <p className="mt-1 text-xs text-gray-400">
-                This must match the Shop ID Tekmetric sends in webhook payloads.
+                This must match the Shop ID Tekmetric uses in tekmetric URL when logged into tekmetric.
               </p>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function SettingsPage() {
             Subscription
           </h2>
           <p className="mb-3 text-sm text-gray-500">
-            Subscription management will be available here when billing is enabled.
+            Current subscription level.
           </p>
           <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-4 py-1.5 text-sm">
             <span className="h-2 w-2 rounded-full bg-green-400"></span>
