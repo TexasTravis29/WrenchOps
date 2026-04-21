@@ -3,86 +3,117 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabase";
 
 export default function SignupPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [shopId, setShopId] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [tekmetricShopId, setTekmetricShopId] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSignup = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
-  setMessage("");
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
 
-  try {
-    const parsedTekmetricShopId = Number(shopId);
-
-    if (!parsedTekmetricShopId || Number.isNaN(parsedTekmetricShopId)) {
-      throw new Error("A valid Tekmetric Shop ID is required.");
-    }
-
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          tekmetric_shop_id: parsedTekmetricShopId,
+    try {
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      },
-    });
+        body: JSON.stringify({
+          email,
+          password,
+          shopName,
+          tekmetricShopId,
+        }),
+      });
 
-    if (signUpError) throw signUpError;
+      const result = await res.json();
 
-    setMessage("Account created successfully. You can now log in.");
-    router.push("/login");
-  } catch (err: any) {
-    setError(err.message || "Signup failed.");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (!res.ok) {
+        throw new Error(result?.error || "Signup failed.");
+      }
+
+      setMessage(result?.message || "Account created successfully.");
+      router.push("/login");
+    } catch (err: any) {
+      setError(err.message || "Signup failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-6">
+    <main className="flex min-h-screen items-center justify-center bg-gray-100 p-6">
       <form
         onSubmit={handleSignup}
-        className="w-full max-w-md space-y-4 rounded-2xl border p-6 shadow"
+        className="w-full max-w-md space-y-4 rounded-2xl bg-white p-6 shadow"
       >
-        <h1 className="text-2xl font-bold">Create Account</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
 
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded border p-3"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Shop Name
+          </label>
+          <input
+            type="text"
+            placeholder="Premier1 Dominion"
+            value={shopName}
+            onChange={(e) => setShopName(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 text-gray-900"
+            required
+          />
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded border p-3"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Tekmetric Shop ID
+          </label>
+          <input
+            type="number"
+            placeholder="7312"
+            value={tekmetricShopId}
+            onChange={(e) => setTekmetricShopId(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 text-gray-900"
+            required
+          />
+        </div>
 
-        <input
-          type="number"
-          placeholder="Tekmetric Shop ID"
-          value={shopId}
-          onChange={(e) => setShopId(e.target.value)}
-          className="w-full rounded border p-3"
-          required
-        />
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            type="email"
+            placeholder="name@shop.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 text-gray-900"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Password
+          </label>
+          <input
+            type="password"
+            placeholder="At least 6 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 text-gray-900"
+            required
+          />
+        </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
         {message && <p className="text-sm text-green-600">{message}</p>}
