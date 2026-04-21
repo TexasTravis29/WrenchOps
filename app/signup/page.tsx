@@ -65,7 +65,7 @@ export default function SignupPage() {
           </label>
           <input
             type="text"
-            placeholder="Premier1 Dominion"
+            placeholder="John Doe Auto"
             value={shopName}
             onChange={(e) => setShopName(e.target.value)}
             className="w-full rounded border border-gray-300 p-3 text-gray-900"
@@ -79,7 +79,7 @@ export default function SignupPage() {
           </label>
           <input
             type="number"
-            placeholder="7312"
+            placeholder="4 Digit # from Tekmetric URL"
             value={tekmetricShopId}
             onChange={(e) => setTekmetricShopId(e.target.value)}
             className="w-full rounded border border-gray-300 p-3 text-gray-900"
