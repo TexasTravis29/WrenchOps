@@ -210,9 +210,14 @@ export default function Home() {
     <main className="min-h-screen bg-gray-100 p-6">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold text-gray-800">
-            Tekmetric Action Dashboard
-          </h1>
+          <img
+            src="/WrenchOps_Logo.png"
+            alt="WrenchOps"
+            className="h-20 w-auto"
+          />
+          <p className="mt-1 text-sm font-medium text-gray-500 uppercase tracking-widest">
+            Shop Activity Dashboard
+          </p>
           <div className="mt-2 text-sm text-gray-600">
             <div>Shop: {shopName || "Unknown Shop"}</div>
             <div>User: {userEmail}</div>
