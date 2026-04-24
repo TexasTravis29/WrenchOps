@@ -111,14 +111,6 @@ export default function Home() {
 
   const markDone = async (item: ActionItem) => {
     const now = new Date();
-    let durationMinutes = item.duration_minutes;
-
-    if (item.started_at && !item.ended_at) {
-      const started = new Date(item.started_at);
-      durationMinutes = Math.round(
-        (now.getTime() - started.getTime()) / 1000 / 60
-      );
-    }
 
     try {
       const { error } = await supabase
@@ -126,8 +118,6 @@ export default function Home() {
         .update({
           is_completed: true,
           is_active: false,
-          ended_at: item.ended_at || now.toISOString(),
-          duration_minutes: durationMinutes,
           completed_at: now.toISOString(),
         })
         .eq("id", item.id)
@@ -176,22 +166,11 @@ export default function Home() {
       const now = new Date();
 
       for (const item of pendingItems) {
-        let durationMinutes = item.duration_minutes;
-
-        if (item.started_at && !item.ended_at) {
-          const started = new Date(item.started_at);
-          durationMinutes = Math.round(
-            (now.getTime() - started.getTime()) / 1000 / 60
-          );
-        }
-
         const { error } = await supabase
           .from("action_items")
           .update({
             is_completed: true,
             is_active: false,
-            ended_at: item.ended_at || now.toISOString(),
-            duration_minutes: durationMinutes,
             completed_at: now.toISOString(),
           })
           .eq("id", item.id)
